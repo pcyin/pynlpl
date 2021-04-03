@@ -204,7 +204,7 @@ class WordAlignment:
             assert line.startswith("#")
             src = self.stream.readline().split()
             trg = []
-            alignment = [None for i in xrange(len(src))]
+            alignment = [None for i in range(len(src))]
 
             for i, (targetWord, positions) in enumerate(parseAlignment(self.stream.readline().split())):
 
@@ -288,8 +288,12 @@ class IntersectionAlignment:
 
     def __iter__(self):
         for (src, trg, alignment), (revsrc, revtrg, revalignment) in zip(self.s2t,self.t2s): #will take unnecessary memory in Python 2.x, optimal in Python 3
+            is_valid = True
             if src != revsrc or trg != revtrg:
-                raise Exception("Files are not identical!")
+                print(f"{src}, {revsrc} | {trg}, {revtrg} are not identical!")
+                is_valid = False
+
+                yield src, revtrg, [], is_valid
             else:
                 #keep only those alignments that are present in both
                 intersection = []
@@ -299,9 +303,8 @@ class IntersectionAlignment:
                     else:
                         intersection.append(None)
 
-                yield src, trg, intersection
+                yield src, trg, intersection, is_valid
 
     def reset(self):
         self.s2t.reset()
         self.t2s.reset()
-
